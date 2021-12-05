@@ -1,0 +1,250 @@
+<html>
+  <head>
+    <title>Dice</title>
+    <style>
+      /* */
+      .container {
+        width: 275px;
+        margin: 0 auto;
+      }
+      /* Navigation */
+      #menu ul {
+        list-style: none;
+        height: 25px;
+        padding: 0;
+      }
+      #menu li {
+        float: left;
+        margin-right: 25px;
+        cursor: pointer;
+        color: blue;
+        text-decoration: underline;
+      }
+      #menu li:hover {
+        color: black;
+      }
+      .tab {
+        display: none;
+      }
+      body.rules #menu .rules,body.game #menu .game,body.about #menu .about,body.settings #menu .settings {
+        font-weight: bold;
+      }
+      body .tab#menu,body.rules .tab#rules,body.game .tab#game,body.about .tab#about,body.settings .tab#settings {
+        display: block;
+      }
+
+      /* Dice */
+      .dice {
+        height: 50px;
+        width:  50px;
+        border:  1px solid black;
+        border-radius: 10px;
+        font-size: 45px;
+        text-align: center;
+      }
+      .dice {
+        float:  left;
+      }
+      .dice .column {
+        float: left;
+        margin-left: 2px;
+        margin-top: 3px;
+      }
+      .dice .column2 {
+        margin-top: 16px;
+      }
+      .dice .pip {
+        border: 1px solid black;
+        border-radius: 5px;
+        height: 5px;
+        width:  5px;
+        background-color: black;
+        margin:  6px 3px;
+        visibility: hidden;
+      }
+      .dice.dice-face-1 .pip1,.dice.dice-face-2 .pip2,.dice.dice-face-3 .pip3,.dice.dice-face-4 .pip4,.dice.dice-face-5 .pip5,.dice.dice-face-6 .pip6 {
+        visibility: visible;
+      }
+    </style>
+  </head>
+  <body class="menu game">
+    <div class="container">
+      <h1>Dice</h1>
+
+      <div class="tab" id="menu">
+        <h2>Menu</h2>
+        <ul>
+          <li class="rules"onclick="menu('rules')">Rules</li>
+          <li class="game" onclick="menu('game')">Game</li>
+          <li class="about" onclick="menu('about')">About</li>
+          <li class="settings" onclick="menu('settings')">Settings</li>
+        </ul>
+      </div>
+
+      <div class="tab" id="rules">
+        <h2>Rules</h2>
+        <p>The rules of dice are as follows:</p>
+        <ol>
+          <li>starting with player 1 and going to player n</li>
+          <li>each player rolls all the dice</li>
+          <li>the player with the highest total wins</li>
+        </ol>
+      </div>
+
+      <div class="tab" id="settings">
+        <h2>Settings</h2>
+        <p>Number of dice: <input type="text" value="2" size="2" id="numberOfDice" /></p>
+        <p>Number of players: <input type="text" value="2" size="2" disabled="disabled" id="numberOfPlayers" /></p>
+<!--        <p>Player 1: <input checked="checked" type="radio" name="player1Status" value="human" id="player1HumanStatus" /> <label for="player1HumanStatus">Human</label> <input type="radio" name="player1Status" value="computer" id="player1ComputerStatus" /><label for="player1ComputerStatus" />Computer</p>
+        <p>Player 2: <input checked="checked" type="radio" name="player2Status" value="human" id="player2HumanStatus" /> <label for="player2HumanStatus">Human</label> <input type="radio" name="player2Status" value="computer" id="player2ComputerStatus" /><label for="player2ComputerStatus" />Computer</p></p> -->
+        <p><button onclick="playAgain()">Restart game</button></p>
+      </div>
+
+      <div class="tab" id="game">
+        <h2>Game</h2>
+        <div id="dice">
+        </div>
+        <div id="players">
+          <p>Player 1: <span class="total" id="player1Total"></span></p>
+          <div>
+            Player 2: <span class="total" id="player2Total"></span>
+          </div>
+        </div>
+        <div id="winner"></div>
+      </div>
+
+      <div class="tab" id="about">
+        <h2>About</h2>
+        <p>Dice is a game you play with people who are your friends now but likely wont be in the future</p>
+      </div>
+
+      <div class="footer">
+        <p>&copy; 2021 Steven Harradine</p>
+        <p>All rights reserved</p>
+      </div>
+    </div>
+    <script>
+      function menu (menu) {
+        document.getElementsByTagName("body")[0].classList.remove("rules");
+        document.getElementsByTagName("body")[0].classList.remove("game");
+        document.getElementsByTagName("body")[0].classList.remove("about");
+        document.getElementsByTagName("body")[0].classList.remove("settings");
+
+        document.getElementsByTagName("body")[0].classList.add(menu);
+      }
+
+      function getDiceRollValue() {
+        return Math.floor(Math.random() * 6) + 1;
+      }
+
+      function roll (output) {
+        visualizeDice(25, output)
+      }
+
+      function finishRoll(output) {
+        var numberOfDice = document.getElementById("numberOfDice").value
+        var total = 0
+
+        clearDice()
+
+        for (var i = 1; i <= numberOfDice; i++) {
+          var die = getDiceRollValue()
+          document.getElementById("dice" + i).classList.add("dice-face-" + die)
+          total += die
+        }
+
+        document.getElementById(output).innerHTML = total
+
+        findWinner()
+      }
+
+      function clearDice () {
+        var numberOfDice = document.getElementById("numberOfDice").value
+
+        for (var i = 1; i <= numberOfDice; i++) {
+          for (var j = 1; j <= 6; j++) {
+            var classList = document.getElementById("dice" + i).classList
+            if (classList !== null)
+              classList.remove("dice-face-" + j)
+          }
+        }
+      }
+
+      function findWinner () {
+        player1Total = Number(document.getElementById ("player1Total").innerHTML)
+        player2Total = Number(document.getElementById ("player2Total").innerHTML)
+
+        var result
+
+        if (!isNaN (player1Total) && !isNaN (player2Total)) {
+          if (player1Total == player2Total) {
+            result = "Tie"
+          } else if (player1Total > player2Total) {
+            result = "Player 1 Wins!"
+          } else if (player1Total < player2Total) {
+            result = "Player 2 Wins!"
+          }
+
+          result += "<br/><button onclick=\"playAgain()\">Play Again</button>"
+          document.getElementById ("winner").innerHTML = result
+        }
+      }
+
+      function visualizeDice (counter, output) {
+        var numberOfDice = document.getElementById("numberOfDice").value
+
+        clearDice()
+
+        for (var i = 1; i <= numberOfDice; i++) {
+          document.getElementById("dice" + i).classList.add("dice-face-" + getDiceRollValue())
+        }
+
+        if (counter >= 1) {
+          setTimeout(function () {visualizeDice(--counter, output)}, 750/counter)
+        } else {
+          finishRoll(output)
+        }
+      }
+
+      function playAgain () {
+        var diceBuffer = ""
+        var numberOfDice = document.getElementById("numberOfDice").value
+
+        for (var i = 1; i <= numberOfDice; i++) {
+          diceBuffer += '  <div class="dice" id="dice' + i + '">'
+          diceBuffer += '    <div class="column column1">'
+          diceBuffer += '      <div class="pip pip2 pip3 pip4 pip5 pip6"></div>'
+          diceBuffer += '      <div class="pip pip6"></div>'
+          diceBuffer += '      <div class="pip pip4 pip5 pip6"></div>'
+          diceBuffer += '    </div>'
+          diceBuffer += '    <div class="column column2">'
+          diceBuffer += '      <div class="pip pip1 pip3 pip5"></div>'
+          diceBuffer += '    </div>'
+          diceBuffer += '    <div class="column column3">'
+          diceBuffer += '      <div class="pip pip4 pip5 pip6"></div>'
+          diceBuffer += '      <div class="pip pip6"></div>'
+          diceBuffer += '      <div class="pip pip2 pip3 pip4 pip5 pip6"></div>'
+          diceBuffer += '    </div>'
+          diceBuffer += '  </div>'
+        }
+
+        document.getElementById("dice").innerHTML = diceBuffer + "<div style='clear: both'></div>"
+ 
+        clearDice()
+
+        var playerBuffer = ""
+        var numberOfPlayers = document.getElementById("numberOfPlayers").value
+
+        for (var i = 1; i <= numberOfPlayers; i++) {
+          playerBuffer += '<div>Player ' + i + ': <span class="total" id="player' + i + 'Total"><button onclick="roll(\'player' + i + 'Total\')">Roll</button></span></div>'
+        }
+
+        document.getElementById("players").innerHTML = playerBuffer
+
+        document.getElementById ("winner").innerHTML = ""
+      }
+
+      playAgain (); // initialize
+    </script>
+  </body>
+</html>
